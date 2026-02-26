@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# pt-me CLI wrapper
+# Publish + Telegram Notify
+
+PROJECT_DIR="${PT_ME_PROJECT_DIR:-/home/pets/TOOLS/pt-me_cli}"
+PYTHON_BIN="${PT_ME_PYTHON_BIN:-python3}"
+
+# Check if virtual environment exists
+if [[ -f "$PROJECT_DIR/.venv/bin/python" ]]; then
+    PYTHON_BIN="$PROJECT_DIR/.venv/bin/python"
+elif ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+    echo "Python not found: $PYTHON_BIN" >&2
+    exit 2
+fi
+
+# Set up Python path
+export PYTHONPATH="$PROJECT_DIR/src:${PYTHONPATH:-}"
+
+# Execute pt-me
+exec "$PYTHON_BIN" -m pt_me.cli "$@"
