@@ -40,6 +40,7 @@ dev = [
 
 [project.scripts]
 pt-me = "pt_me.cli:main"
+p2me = "p2me.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/almazomkz/pt-me_cli"

@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "package_id": "sdd_20260310_160836",
+    "created_at": "2026-03-10T16:08:36+03:00",
+    "source_focus": "uncommitted changes",
+    "source_combined_report": "6_reviewers_combined_report_20260310_160836.md",
+    "total_story_points": 12,
+    "status": "completed"
+  },
+  "source_reports": [
+    "security_auditor_report_at20260310_160836.md",
+    "performance_engineer_report_at20260310_160836.md",
+    "maintainer_report_at20260310_160836.md",
+    "simplicity_advocate_report_at20260310_160836.md",
+    "testability_engineer_report_at20260310_160836.md",
+    "api_guardian_report_at20260310_160836.md"
+  ],
+  "workflow_rules": {
+    "wip_limit": 2,
+    "require_review": true,
+    "atomic_commits": true,
+    "commit_prefix": {
+      "P0": "fix:",
+      "P1": "refactor:",
+      "P2": "chore:",
+      "simplification": "simplify:"
+    }
+  },
+  "columns": {
+    "backlog": {
+      "order": 0,
+      "wip_limit": null,
+      "cards": []
+    },
+    "in_progress": {
+      "order": 1,
+      "wip_limit": 2,
+      "cards": [],
+      "rule": "Max 2 cards. Must update kanban.json when moving."
+    },
+    "in_review": {
+      "order": 2,
+      "wip_limit": null,
+      "cards": [],
+      "rule": "Self-review required before mark done."
+    },
+    "done": {
+      "order": 3,
+      "wip_limit": null,
+      "cards": [
+        "P0_001",
+        "P0_002",
+        "P1_001",
+        "P2_001"
+      ],
+      "rule": "Atomic commit required. Update kanban.json."
+    }
+  },
+  "cards": {
+    "P0_001": {
+      "title": "Make --validate truly side-effect free",
+      "priority": "P0",
+      "story_points": 5,
+      "status": "done",
+      "column": "03_done",
+      "file": "P0_001_validate_contract.md",
+      "expert": "API Guardian",
+      "source_report": "api_guardian_report_at20260310_160836.md",
+      "blocker": true,
+      "acceptance_criteria": [
+        "`p2me file --validate` never invokes publish or notify",
+        "Help, capabilities, and docs match the final validate behavior",
+        "Contract tests cover valid and invalid validation-only runs"
+      ],
+      "git_branch": "implement/sdd_20260310_160836",
+      "commits": [],
+      "started_at": "2026-03-10T16:08:36+03:00",
+      "completed_at": "2026-03-10T16:26:20+03:00"
+    },
+    "P0_002": {
+      "title": "Fix path-bound p2me tests and docs",
+      "priority": "P0",
+      "story_points": 2,
+      "status": "done",
+      "column": "03_done",
+      "file": "P0_002_fix_path_bound_tests.md",
+      "expert": "Testability Engineer",
+      "source_report": "testability_engineer_report_at20260310_160836.md",
+      "blocker": true,
+      "acceptance_criteria": [
+        "New p2me tests use repo-relative paths instead of machine-local absolute paths",
+        "HOW_TO_TEST.md points at the actual project layout",
+        "`PYTHONPATH=src python -m pytest` returns green for the repository"
+      ],
+      "git_branch": "implement/sdd_20260310_160836",
+      "commits": [],
+      "started_at": "2026-03-10T16:08:36+03:00",
+      "completed_at": "2026-03-10T16:26:20+03:00"
+    },
+    "P1_001": {
+      "title": "Harden or remove --film-url network boundary",
+      "priority": "P1",
+      "story_points": 3,
+      "status": "done",
+      "column": "03_done",
+      "file": "P1_001_harden_film_url_boundary.md",
+      "expert": "Security Auditor",
+      "source_report": "security_auditor_report_at20260310_160836.md",
+      "blocker": false,
+      "acceptance_criteria": [
+        "Only explicitly allowed hosts and schemes are accepted for film lookups, or the flag is removed",
+        "Private-address, localhost, and unsupported scheme inputs are rejected",
+        "Tests cover allowed and denied URL cases"
+      ],
+      "git_branch": "implement/sdd_20260310_160836",
+      "commits": [],
+      "started_at": "2026-03-10T16:08:36+03:00",
+      "completed_at": "2026-03-10T16:26:20+03:00"
+    },
+    "P2_001": {
+      "title": "Align quiet-mode docs and regenerate published test results",
+      "priority": "P2",
+      "story_points": 2,
+      "status": "done",
+      "column": "03_done",
+      "file": "P2_001_align_quiet_mode_and_docs.md",
+      "expert": "Maintainer",
+      "source_report": "maintainer_report_at20260310_160836.md",
+      "blocker": false,
+      "acceptance_criteria": [
+        "`--quiet` behavior and help text describe the same contract",
+        "TEST_PLAN.md and HOW_TO_TEST.md reflect real runs from this repo",
+        "A regression test covers quiet-mode error behavior"
+      ],
+      "git_branch": "implement/sdd_20260310_160836",
+      "commits": [],
+      "started_at": "2026-03-10T16:08:36+03:00",
+      "completed_at": "2026-03-10T16:26:20+03:00"
+    }
+  }
+}
