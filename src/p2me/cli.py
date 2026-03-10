@@ -261,6 +261,46 @@ def _read_stdin_bytes() -> bytes:
     return content.encode("utf-8")
 
 
+def _input_error(code: str, message: str) -> dict[str, Any]:
+    """Create a standardized input-stage error."""
+    return create_error(
+        code=code,
+        message=message,
+        stage=ErrorStage.INPUT,
+    )
+
+
+def _validation_payload(source_type: str, size_bytes: int) -> dict[str, Any]:
+    """Create a validation result payload."""
+    return {
+        "ok": True,
+        "source_type": source_type,
+        "size_bytes": size_bytes,
+    }
+
+
+def _decode_validation_content(
+    content: bytes,
+    *,
+    stdin: bool = False,
+    source: str | None = None,
+) -> dict[str, Any] | None:
+    """Validate UTF-8 content and return an input error if decoding fails."""
+    try:
+        content.decode("utf-8")
+    except UnicodeDecodeError:
+        if stdin:
+            return _input_error(
+                ErrorCode.FILE_READ_ERROR,
+                "Cannot decode stdin as UTF-8",
+            )
+        return _input_error(
+            ErrorCode.FILE_READ_ERROR,
+            f"Cannot decode file as UTF-8: {source}",
+        )
+    return None
+
+
 def validate_source_input(
     source: str,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
@@ -268,69 +308,42 @@ def validate_source_input(
     if source == "-":
         content = _read_stdin_bytes()
         if not content:
-            return None, create_error(
-                code=ErrorCode.EMPTY_CONTENT,
-                message="No input provided via stdin",
-                stage=ErrorStage.INPUT,
+            return None, _input_error(
+                ErrorCode.EMPTY_CONTENT,
+                "No input provided via stdin",
             )
-        try:
-            content.decode("utf-8")
-        except UnicodeDecodeError:
-            return None, create_error(
-                code=ErrorCode.FILE_READ_ERROR,
-                message="Cannot decode stdin as UTF-8",
-                stage=ErrorStage.INPUT,
-            )
-        return {
-            "ok": True,
-            "source_type": "stdin",
-            "size_bytes": len(content),
-        }, None
+
+        decode_error = _decode_validation_content(content, stdin=True)
+        if decode_error:
+            return None, decode_error
+
+        return _validation_payload("stdin", len(content)), None
 
     path = Path(source).expanduser()
     if not path.exists():
-        return None, create_error(
-            code=ErrorCode.FILE_NOT_FOUND,
-            message=f"File not found: {source}",
-            stage=ErrorStage.INPUT,
-        )
+        return None, _input_error(ErrorCode.FILE_NOT_FOUND, f"File not found: {source}")
     if not path.is_file():
-        return None, create_error(
-            code=ErrorCode.INVALID_INPUT,
-            message=f"Path is not a file: {source}",
-            stage=ErrorStage.INPUT,
+        return None, _input_error(
+            ErrorCode.INVALID_INPUT,
+            f"Path is not a file: {source}",
         )
 
     try:
         content = path.read_bytes()
     except OSError as exc:
-        return None, create_error(
-            code=ErrorCode.FILE_READ_ERROR,
-            message=f"Cannot read file: {exc}",
-            stage=ErrorStage.INPUT,
+        return None, _input_error(
+            ErrorCode.FILE_READ_ERROR,
+            f"Cannot read file: {exc}",
         )
 
     if not content:
-        return None, create_error(
-            code=ErrorCode.EMPTY_CONTENT,
-            message="Content is empty",
-            stage=ErrorStage.INPUT,
-        )
+        return None, _input_error(ErrorCode.EMPTY_CONTENT, "Content is empty")
 
-    try:
-        content.decode("utf-8")
-    except UnicodeDecodeError:
-        return None, create_error(
-            code=ErrorCode.FILE_READ_ERROR,
-            message=f"Cannot decode file as UTF-8: {source}",
-            stage=ErrorStage.INPUT,
-        )
+    decode_error = _decode_validation_content(content, source=source)
+    if decode_error:
+        return None, decode_error
 
-    return {
-        "ok": True,
-        "source_type": "file",
-        "size_bytes": len(content),
-    }, None
+    return _validation_payload("file", len(content)), None
 
 
 def run_validation(
